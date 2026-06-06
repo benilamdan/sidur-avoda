@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>סידור עבודה – מחלקת כביסה</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-dark: #0f2a4a;
+    --blue-mid:  #1a4a7a;
+    --blue-acc:  #2979c8;
+    --blue-light:#e8f2ff;
+    --boker-c:   #d97706;
+    --erev-c:    #c2410c;
+    --layla-c:   #4338ca;
+    --off-c:     #94a3b8;
+    --bg:        #f0f4f8;
+    --card:      #ffffff;
+    --text:      #1e293b;
+    --text-light:#64748b;
+    --green:     #16a34a;
+    --yellow:    #ca8a04;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Heebo', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; direction: rtl; }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+    color: white; padding: 18px 20px 14px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+  .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .logo-wrap { display: flex; align-items: center; gap: 10px; }
+  .logo-box { width: 40px; height: 40px; background: var(--blue-acc); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .dept-name { font-size: 17px; font-weight: 700; }
+  .hosp-name { font-size: 12px; opacity: 0.65; font-weight: 300; }
+  .date-box { text-align: left; }
+  .date-day { font-size: 11px; opacity: 0.7; }
+  .date-full { font-size: 20px; font-weight: 900; letter-spacing: -0.5px; }
+  .view-toggle { display: flex; gap: 6px; background: rgba(255,255,255,0.12); border-radius: 10px; padding: 4px; }
+  .vtab { flex: 1; padding: 8px 0; border: none; border-radius: 7px; cursor: pointer; font-family: 'Heebo', sans-serif; font-size: 14px; font-weight: 500; background: transparent; color: rgba(255,255,255,0.65); transition: all 0.2s; }
+  .vtab.on { background: white; color: var(--blue-dark); font-weight: 700; }
+
+  /* ── Main ── */
+  main { padding: 18px 16px 40px; max-width: 680px; margin: 0 auto; }
+
+  /* ── Loading ── */
+  .loading { text-align: center; padding: 60px 20px; color: var(--text-light); }
+  .spinner { width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: var(--blue-acc); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Today ── */
+  .today-title { font-size: 26px; font-weight: 900; color: var(--blue-dark); text-align: center; margin-bottom: 4px; }
+  .today-sub { font-size: 13px; color: var(--text-light); text-align: center; margin-bottom: 20px; }
+
+  .shift-block { background: var(--card); border-radius: 16px; margin-bottom: 14px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.07); animation: up 0.35s ease both; }
+  @keyframes up { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform: translateY(0); } }
+
+  .shift-hdr { display: flex; align-items: center; gap: 10px; padding: 13px 18px; color: white; font-weight: 700; font-size: 15px; }
+  .shift-hdr.boker { background: linear-gradient(90deg,#b45309,#f59e0b); }
+  .shift-hdr.erev  { background: linear-gradient(90deg,#9a3412,#f97316); }
+  .shift-hdr.layla { background: linear-gradient(90deg,#3730a3,#818cf8); }
+  .shift-cnt { margin-right: auto; background: rgba(255,255,255,0.25); border-radius: 20px; padding: 2px 10px; font-size: 12px; }
+
+  .workers-wrap { padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { display: flex; align-items: center; gap: 6px; background: var(--bg); border-radius: 20px; padding: 6px 12px; font-size: 14px; font-weight: 500; }
+  .badge { font-size: 10px; background: var(--blue-acc); color: white; border-radius: 10px; padding: 1px 7px; white-space: nowrap; }
+  .badge.sp { background: #10b981; }
+  .badge.mc { background: var(--layla-c); }
+  .badge.is { background: #db2777; }
+
+  /* ── Personal ── */
+  .sel-label { font-size: 14px; color: var(--text-light); font-weight: 500; margin-bottom: 8px; }
+  .name-sel {
+    width: 100%; padding: 13px 16px; font-family: 'Heebo',sans-serif; font-size: 16px;
+    border: 2px solid #e2e8f0; border-radius: 12px; background: white; color: var(--text);
+    direction: rtl; outline: none; transition: border-color 0.2s; margin-bottom: 20px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2364748b' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: left 14px center;
+  }
+  .name-sel:focus { border-color: var(--blue-acc); }
+
+  .week-list { display: flex; flex-direction: column; gap: 9px; }
+  .day-row { background: var(--card); border-radius: 13px; overflow: hidden; display: flex; box-shadow: 0 2px 8px rgba(0,0,0,0.06); animation: up 0.3s ease both; }
+  .day-side { width: 62px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 12px; flex-shrink: 0; padding: 10px 0; }
+  .day-side.boker { background: linear-gradient(180deg,#b45309,#f59e0b); }
+  .day-side.erev  { background: linear-gradient(180deg,#9a3412,#f97316); }
+  .day-side.layla { background: linear-gradient(180deg,#3730a3,#818cf8); }
+  .day-side.off   { background: #cbd5e1; }
+  .day-num { font-size: 21px; font-weight: 900; line-height: 1; }
+  .day-info { padding: 11px 15px; flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+  .day-name-lbl { font-size: 12px; color: var(--text-light); }
+  .day-shift-lbl { font-size: 15px; font-weight: 700; }
+  .day-role-tag { display: inline-block; font-size: 11px; background: var(--blue-light); color: var(--blue-acc); border-radius: 8px; padding: 2px 8px; font-weight: 600; width: fit-content; }
+  .today-pill { background: var(--blue-acc); color: white; font-size: 10px; padding: 1px 7px; border-radius: 8px; font-weight: 700; margin-right: 5px; }
+  .off-lbl { color: var(--text-light); font-size: 13px; font-style: italic; }
+
+  /* ── Error ── */
+  .err-box { background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px; padding: 16px 18px; color: #9f1239; font-size: 14px; margin-top: 16px; }
+
+  /* ── Footer ── */
+  footer { text-align: center; padding: 20px; color: var(--text-light); font-size: 11px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo-wrap">
+      <div class="logo-box">🏥</div>
+      <div>
+        <div class="hosp-name">בית חולים וולפסון</div>
+        <div class="dept-name">מחלקת כביסה</div>
+      </div>
+    </div>
+    <div class="date-box">
+      <div class="date-day" id="hdrDay"></div>
+      <div class="date-full" id="hdrDate"></div>
+    </div>
+  </div>
+  <div class="view-toggle">
+    <button class="vtab on" onclick="switchTab('today')">משמרות היום</button>
+    <button class="vtab" onclick="switchTab('personal')">המשמרות שלי</button>
+  </div>
+</header>
+
+<main>
+  <div id="todayView">
+    <div class="loading" id="todayLoad">
+      <div class="spinner"></div>
+      <div>טוען נתונים מהסידור...</div>
+    </div>
+    <div id="todayContent" style="display:none"></div>
+  </div>
+
+  <div id="personalView" style="display:none">
+    <div class="sel-label">בחר/י את שמך:</div>
+    <select class="name-sel" id="nameSel" onchange="renderPersonal()">
+      <option value="">-- בחר עובד --</option>
+    </select>
+    <div id="personalContent"></div>
+  </div>
+</main>
+
+<footer id="footerTxt">מחלקת כביסה · בית חולים וולפסון</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════
+const SHEET_ID  = "1lf4jH219vvLsb98fk_cPZfl0W1sc1sLrpkt8w9J2asI";
+const API_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+
+const HEB_DAYS  = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+const HEB_SHORT = ["א׳","ב׳","ג׳","ד׳","ה׳","ו׳","ש׳"];
+// JS getDay(): 0=Sun,1=Mon,...,6=Sat → map to our index 0-6
+const JS2IDX    = [0,1,2,3,4,5,6]; // Sun=0,Mon=1,...,Sat=6
+
+// ══════════════════════════════════════════════════════════
+// SHIFT HELPERS
+// ══════════════════════════════════════════════════════════
+function shiftType(code) {
+  if (!code || ["-","--",""].includes(code.trim())) return "off";
+  const c = code.trim();
+  if (c.startsWith("ב") || c === "05:00" || c.includes("05:0")) return "boker";
+  if (["מחסן22","פרסונל20","מכונות20","ייבוש20","מחסן/ג","מחסן20"].some(x => c.includes(x))) return "layla";
+  if (c.startsWith("ע") || c === "מ" || c === "עמ" || c === "א" || c === "עא") return "erev";
+  return "boker";
+}
+
+function shiftLabel(code) {
+  if (!code || ["-","--",""].includes(code.trim())) return "חופש";
+  const map = {
+    "ב":"בוקר","ע":"ערב","א":"איסוף","מ":"מכונות","עמ":"ערב מכונות",
+    "עא":"ערב איסוף","ב-מ/פ":"בוקר מ/פ","ב-ייבוש":"בוקר ייבוש",
+    "ע-ייבוש":"ערב ייבוש","ע-אחראי":"ערב אחראי","ע-פ":"ערב פרסונל",
+    "ב-עגלות":"בוקר עגלות","ב-וילונות":"בוקר וילונות","ב-גיהוץ":"בוקר גיהוץ",
+    "ב-פ":"בוקר פרסונל","ב-05:00":"בוקר 05:00","05:00":"בוקר 05:00",
+    "מחסן22:00":"מחסן 22:00","פרסונל20:00":"פרסונל 20:00",
+    "מכונות20:00":"מכונות 20:00","ייבוש20:00":"ייבוש 20:00",
+    "מחסן/גיהוץ20:00":"מחסן/גיהוץ 20:00","מחסן20:00":"מחסן 20:00",
+    "ע/עמ":"ערב/מכונות","ע-מחסן":"ערב מחסן",
+  };
+  return map[code.trim()] || code.trim();
+}
+
+function shiftEmoji(type) {
+  return type==="boker"?"☀️":type==="erev"?"🌆":type==="layla"?"🌙":"";
+}
+
+function badgeClass(code) {
+  if (!code) return "";
+  const c = code.trim();
+  if (c==="מ"||c==="עמ"||c.includes("מכונות")) return "mc";
+  if (c==="א"||c==="עא"||c.includes("איסוף")) return "is";
+  if (c==="ב"||c==="ע") return "";
+  return "sp";
+}
+
+// ══════════════════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════════════════
+let allSheets = {};   // sheetName → { weekDates:[], employees:[] }
+// employees: { num, firstName, lastName, shifts:[code×7] }
+
+function parseCSV(csv) {
+  const lines = csv.split("\n").map(l => l.replace(/\r/,""));
+  const rows  = lines.map(l => {
+    // handle quoted commas
+    const r = []; let cur = "", inQ = false;
+    for (let i = 0; i < l.length; i++) {
+      if (l[i]==='"') { inQ=!inQ; }
+      else if (l[i]===","&&!inQ) { r.push(cur.trim()); cur=""; }
+      else { cur+=l[i]; }
+    }
+    r.push(cur.trim()); return r;
+  });
+  return rows;
+}
+
+async function loadSheet(sheetName) {
+  const url = `${API_URL}&sheet=${encodeURIComponent(sheetName)}`;
+  const res  = await fetch(url);
+  const text = await res.text();
+  const rows = parseCSV(text);
+
+  // Find date row: row where col index 3 has a date-like value (dd/mm/yyyy)
+  let dateRow = -1, dateStartCol = 3;
+  for (let r = 0; r < Math.min(5, rows.length); r++) {
+    for (let c = 2; c < rows[r].length; c++) {
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(rows[r][c])) {
+        dateRow = r; dateStartCol = c; break;
+      }
+    }
+    if (dateRow >= 0) break;
+  }
+  if (dateRow < 0) return null;
+
+  // Parse dates (7 days)
+  const weekDates = [];
+  for (let c = dateStartCol; c < dateStartCol + 7 && c < rows[dateRow].length; c++) {
+    const d = rows[dateRow][c];
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(d)) {
+      const [day,mon,yr] = d.split("/").map(Number);
+      weekDates.push(new Date(yr, mon-1, day));
+    } else {
+      weekDates.push(null);
+    }
+  }
+
+  // Parse employees: rows after dateRow that start with a number
+  const employees = [];
+  for (let r = dateRow + 1; r < rows.length; r++) {
+    const row = rows[r];
+    const num = parseInt(row[0]);
+    if (!num || isNaN(num)) continue;
+    const firstName = (row[1]||"").trim();
+    const lastName  = (row[2]||"").trim();
+    if (!firstName) continue;
+    const shifts = [];
+    for (let c = dateStartCol; c < dateStartCol + 7; c++) {
+      shifts.push((row[c]||"").trim());
+    }
+    employees.push({ num, firstName, lastName, shifts });
+  }
+
+  return { weekDates, employees };
+}
+
+// Find the sheet whose week contains today
+function findTodaySheet() {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  for (const [name, data] of Object.entries(allSheets)) {
+    for (const d of data.weekDates) {
+      if (!d) continue;
+      const dd = new Date(d); dd.setHours(0,0,0,0);
+      if (dd.getTime() === today.getTime()) return { name, data, dayIdx: data.weekDates.indexOf(d) };
+    }
+  }
+  // fallback: latest sheet
+  const names = Object.keys(allSheets);
+  if (!names.length) return null;
+  const last = names[names.length-1];
+  return { name: last, data: allSheets[last], dayIdx: 0 };
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER TODAY
+// ══════════════════════════════════════════════════════════
+function renderToday() {
+  const found = findTodaySheet();
+  document.getElementById("todayLoad").style.display = "none";
+  const cont = document.getElementById("todayContent");
+  cont.style.display = "";
+
+  if (!found) {
+    cont.innerHTML = `<div class="err-box">לא נמצא סידור לתאריך היום. ודא שהגיליון מעודכן.</div>`;
+    return;
+  }
+
+  const { data, dayIdx } = found;
+  const todayDate = data.weekDates[dayIdx];
+  const dow = todayDate ? todayDate.getDay() : 0;
+  const hebDayName = HEB_DAYS[dow === 0 ? 0 : dow]; // Sun=0
+
+  let html = `
+    <div style="text-align:center;margin-bottom:20px;animation:up 0.3s ease">
+      <div class="today-title">יום ${hebDayName}</div>
+      <div class="today-sub">כל העובדים המשובצים היום</div>
+    </div>`;
+
+  const groups = { boker:[], erev:[], layla:[] };
+  for (const emp of data.employees) {
+    const code = emp.shifts[dayIdx] || "";
+    const type = shiftType(code);
+    if (type !== "off") groups[type].push({ name: emp.firstName, code });
+  }
+
+  const order = [
+    ["boker","משמרת בוקר"],
+    ["erev", "משמרת ערב"],
+    ["layla","משמרת לילה"],
+  ];
+
+  let delay = 0;
+  for (const [key, label] of order) {
+    if (!groups[key].length) continue;
+    delay += 0.07;
+    html += `
+      <div class="shift-block" style="animation-delay:${delay}s">
+        <div class="shift-hdr ${key}">
+          <span>${shiftEmoji(key)}</span>
+          <span>${label}</span>
+          <span class="shift-cnt">${groups[key].length} עובדים</span>
+        </div>
+        <div class="workers-wrap">
+          ${groups[key].map(w => {
+            const lbl   = shiftLabel(w.code);
+            const bCls  = badgeClass(w.code);
+            const basic = ["בוקר","ערב","איסוף"].includes(lbl);
+            return `<div class="chip">
+              ${w.name}
+              ${!basic&&lbl ? `<span class="badge ${bCls}">${lbl}</span>` : ""}
+            </div>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }
+
+  if (!groups.boker.length && !groups.erev.length && !groups.layla.length) {
+    html += `<div style="text-align:center;padding:48px;color:var(--text-light)">😴 אין משמרות לתאריך זה</div>`;
+  }
+
+  cont.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════
+// RENDER PERSONAL
+// ══════════════════════════════════════════════════════════
+function populateNames() {
+  const sel = document.getElementById("nameSel");
+  const seen = new Set();
+  const names = [];
+  for (const data of Object.values(allSheets)) {
+    for (const emp of data.employees) {
+      if (!seen.has(emp.firstName)) { seen.add(emp.firstName); names.push(emp.firstName); }
+    }
+  }
+  names.sort().forEach(n => {
+    const o = document.createElement("option");
+    o.value = n; o.textContent = n;
+    sel.appendChild(o);
+  });
+}
+
+function renderPersonal() {
+  const name = document.getElementById("nameSel").value;
+  const cont = document.getElementById("personalContent");
+  if (!name) { cont.innerHTML = ""; return; }
+
+  // Find the current/latest sheet
+  const found = findTodaySheet();
+  if (!found) { cont.innerHTML = `<div class="err-box">לא נמצא סידור</div>`; return; }
+
+  const { data, dayIdx } = found;
+  const emp = data.employees.find(e => e.firstName === name);
+  if (!emp) { cont.innerHTML = `<div class="err-box">לא נמצא ${name} בסידור הנוכחי</div>`; return; }
+
+  let html = '<div class="week-list">';
+  for (let i = 0; i < 7; i++) {
+    const code  = emp.shifts[i] || "";
+    const type  = shiftType(code);
+    const lbl   = shiftLabel(code);
+    const d     = data.weekDates[i];
+    const isToday = (i === dayIdx);
+    const dateStr = d ? `${d.getDate().toString().padStart(2,"0")}/${(d.getMonth()+1).toString().padStart(2,"0")}` : "";
+    const dow     = d ? d.getDay() : i;
+    const delay   = i * 0.05;
+
+    html += `
+      <div class="day-row" style="animation-delay:${delay}s">
+        <div class="day-side ${type}" style="${isToday?"outline:3px solid rgba(255,255,255,0.6);outline-offset:-3px":""}">
+          <div class="day-num">${d ? d.getDate() : ""}</div>
+          <div>${HEB_SHORT[dow===0?0:dow]}</div>
+        </div>
+        <div class="day-info">
+          <div class="day-name-lbl">
+            יום ${HEB_DAYS[dow===0?0:dow]} ${dateStr}
+            ${isToday ? '<span class="today-pill">היום</span>' : ""}
+          </div>`;
+
+    if (type === "off") {
+      html += `<div class="off-lbl">חופש / לא משובץ</div>`;
+    } else {
+      html += `
+          <div class="day-shift-lbl">${shiftEmoji(type)} ${lbl}</div>
+          <div class="day-role-tag">${type==="boker"?"משמרת בוקר":type==="erev"?"משמרת ערב":"משמרת לילה"}</div>`;
+    }
+    html += `</div></div>`;
+  }
+  html += "</div>";
+  cont.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.getElementById("todayView").style.display    = tab==="today"    ? "" : "none";
+  document.getElementById("personalView").style.display = tab==="personal" ? "" : "none";
+  document.querySelectorAll(".vtab").forEach((b,i) => {
+    b.classList.toggle("on", (i===0&&tab==="today")||(i===1&&tab==="personal"));
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// HEADER DATE
+// ══════════════════════════════════════════════════════════
+function initHeader() {
+  const t = new Date();
+  const days = ["ראשון","שני","שלישי","רביעי","חמישי","שישי","שבת"];
+  document.getElementById("hdrDay").textContent = "יום " + days[t.getDay()===0?0:t.getDay()];
+  document.getElementById("hdrDate").textContent =
+    `${t.getDate().toString().padStart(2,"0")}/${(t.getMonth()+1).toString().padStart(2,"0")}/${t.getFullYear()}`;
+}
+
+// ══════════════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════════════
+async function boot() {
+  initHeader();
+
+  // Sheet names to try — add new week names here as you add sheets
+  const sheetNames = ["23/11","6/12","תכנון"];
+
+  let loaded = 0;
+  for (const name of sheetNames) {
+    if (name === "תכנון") continue; // planning sheet, skip
+    try {
+      const data = await loadSheet(name);
+      if (data && data.employees.length > 0) {
+        allSheets[name] = data;
+        loaded++;
+      }
+    } catch(e) { console.warn("Could not load sheet:", name, e); }
+  }
+
+  if (loaded === 0) {
+    document.getElementById("todayLoad").innerHTML =
+      `<div class="err-box">לא ניתן לטעון את הנתונים. ודא שהגיליון פתוח לצפייה ציבורית.</div>`;
+    return;
+  }
+
+  document.getElementById("footerTxt").textContent =
+    `מחלקת כביסה · בית חולים וולפסון · עודכן ${new Date().toLocaleTimeString("he-IL",{hour:"2-digit",minute:"2-digit"})}`;
+
+  renderToday();
+  populateNames();
+}
+
+boot();
+</script>
+</body>
+</html>
