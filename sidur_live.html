@@ -5,7 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>סידור עבודה – מחלקת כביסה</title>
 <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-<style>
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                    appId: "abfb85a0-c17f-4639-9230-012f28fa0c08",
+            });
+      });
+  </script>
+<style>  
   :root {
     --blue-dark: #0f2a4a;
     --blue-mid:  #1a4a7a;
