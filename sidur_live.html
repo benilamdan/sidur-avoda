@@ -5,6 +5,17 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<script>
+// Force fresh load if server has newer version
+fetch('version.json?t=' + Date.now())
+  .then(r => r.json())
+  .then(v => {
+    if (!location.search.includes('v=' + v.ts)) {
+      location.replace(location.pathname + '?v=' + v.ts);
+    }
+  })
+  .catch(() => {});
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -577,10 +588,6 @@
     <div class="today-card" style="margin-top:16px">
       <div class="today-header" id="tomorrowTitle" style="background:linear-gradient(135deg,#6b46c1,#553c9a)">משמרות מחר</div>
       <div class="shift-list" id="tomorrowList"></div>
-    </div>
-    <div class="today-card" style="margin-top:16px">
-      <div class="today-header" id="dayAfterTitle" style="background:linear-gradient(135deg,#0f766e,#0d6b63)">משמרות מחרתיים</div>
-      <div class="shift-list" id="dayAfterList"></div>
     </div>
   </div>
 
@@ -2083,32 +2090,6 @@ function renderToday() {
     }
   }
 
-  // ---- DAY AFTER TOMORROW ----
-  const daList = document.getElementById('dayAfterList');
-  const daTitle = document.getElementById('dayAfterTitle');
-  const da = (ti + 2) % 7;
-  const daDate = (ti <= 4) ? dates[da] : null;
-
-  if (ti >= 5 || !daDate) {
-    daTitle.textContent = 'משמרות מחרתיים';
-    daList.innerHTML = '<div class="no-data">מחרתיים מחוץ לשבוע זה</div>';
-  } else {
-    daTitle.textContent = `משמרות מחרתיים — ${DAYS_HE[da]}, ${formatDate(daDate)}`;
-    const daShifts = scheduleData.shifts.filter(s => s.day === da);
-    if (!daShifts.length) {
-      daList.innerHTML = '<div class="no-data">אין משמרות מוגדרות למחרתיים</div>';
-    } else {
-      const daIsShabbat = da === 6;
-      const dam = sortShifts(daShifts.filter(s => !s.role.startsWith('ע') && !(daIsShabbat && isNightRole(s.role))));
-      const dae = sortShifts(daShifts.filter(s => s.role.startsWith('ע')));
-      const dan = daIsShabbat ? sortShifts(daShifts.filter(s => isNightRole(s.role))) : [];
-      let dah = '';
-      if (dam.length) dah += `<div class="group-label">☀️ בוקר</div>${shiftCards(dam)}`;
-      if (dae.length) dah += `<div class="group-label" style="margin-top:14px">🌆 ערב</div>${shiftCards(dae)}`;
-      if (dan.length) dah += `<div class="group-label" style="margin-top:14px">🌙 לילה</div>${shiftCards(dan)}`;
-      daList.innerHTML = dah;
-    }
-  }
 }
 
 // ---- WEEK ----
