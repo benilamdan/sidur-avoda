@@ -1,0 +1,35 @@
+name: Sync to sidur repo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sidur_live.html'
+      - 'version.json'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push sidur_live.html and version.json to sidur repo
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Clone sidur repo
+          git clone https://x-access-token:${GH_TOKEN}@github.com/benilamdan/sidur.git /tmp/sidur-target
+
+          # Copy files
+          cp sidur_live.html /tmp/sidur-target/sidur_live.html
+          cp version.json /tmp/sidur-target/version.json
+
+          # Commit and push
+          cd /tmp/sidur-target
+          git add sidur_live.html version.json
+          git diff --staged --quiet && echo "No changes" && exit 0
+          git commit -m "סנכרון אוטומטי מ-sidur-avoda"
+          git push
